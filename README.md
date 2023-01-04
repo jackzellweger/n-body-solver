@@ -1,15 +1,3 @@
-Function Declarations
-
-```
-PythagoreanTriple[distance_] := Module[{x, y, a, q, r},
-  x = RandomReal[{0, distance}];
-  a = Quiet[Solve[distance == Sqrt[x^2 + y^2], y, Reals]];
-  {q, r} = {x, Values @@ a[[2]]};
-  {q, r} = RandomChoice[{{q, r}, {q, -r}, {-q, r}, {-q, -r}}];
-  Return[{q, r}]
-  ]
-```
-
 # The N-Body Solver
 
 ## Introduction
@@ -24,9 +12,10 @@ That's right, like 99% of physics, it all comes from Newton's Second Law. Almost
 
 Since I have a physics background, let's draw inspiration from the scale and movements of our own solar system. I will use numbers that roughly approximate (to +/- 3 orders of magnitude) the sizes and masses of the planets.
 
-There are a few constants, then, that we need to have handy for our program to access. We will use combinations of these constants to define other variables that we will use to run our program. For example, we will use a combination of constants to define the orbital period of the Earth, T. We will then use T to define the step size for our program. Everything has to agree on the same order of magnitude for this program to work—everything has to be in-sync.
+There are a few constants, then, that we need to have handy for our program to access. We will use combinations of these constants to define other variables that we will use to run our program. For example, we will use a combination of constants to define the orbital period of the Earth, `T`. We will then use `T` to define the step size for our program. Everything has to agree on the same order of magnitude for this program to work—everything has to be in-sync.
 
 **Note: All units are given in SI units.**
+
 
 ## Declaring Celestial Variables & Constants
 
@@ -34,11 +23,11 @@ The Universal Gravitational Constant (UGC). This constant defines the strength o
 
 `G = 6.67 10^-11;`
 
-The mass of the sun in kilograms:
+The mass of the Sun in kilograms:
 
 `ms = 1.988435 10^30;`
 
-The mass of the earth in kilograms:
+The mass of the Earth in kilograms:
 
 `me = 5.97219*10^24;`
 
@@ -46,19 +35,19 @@ The radius of Sun in meters:
 
 `R = 6.955*10^8;`
 
-Earth's starting x- coordinate in meters:
+Earth's starting `x`-coordinate in meters:
 
 `xn = 1.506*^11;`
 
-Earth's starting y-coordinate in meters:
+Earth's starting `y`-coordinate in meters:
 
 `yn = 0.;`
 
-Earth's starting x-velocity in meters per second:
+Earth's starting `x`-velocity in meters per second:
 
 `vxn = 0.;`
 
-Starting speed of earth in y direction in meters per second
+Starting speed of earth in `y`-direction in meters per second
 
 `vyn = 29598.;`
 
@@ -109,6 +98,18 @@ ms = QuantityMagnitude[
    UnitConvert[Entity["Star", "Sun"][EntityProperty["Star", "Mass"]]]];
 ```
 
+## Declaring Functions
+
+```
+PythagoreanTriple[distance_] := Module[{x, y, a, q, r},
+  x = RandomReal[{0, distance}];
+  a = Quiet[Solve[distance == Sqrt[x^2 + y^2], y, Reals]];
+  {q, r} = {x, Values @@ a[[2]]};
+  {q, r} = RandomChoice[{{q, r}, {q, -r}, {-q, r}, {-q, -r}}];
+  Return[{q, r}]
+  ]
+```
+
 ## Getting User Input
 
 Change this number to the number of planets we'd like to simulate in the system:
@@ -146,7 +147,7 @@ A more descriptive variable name would be nice, but I chose `m` as the name here
 
 `m = earthMassesArray;`
 
-This is where we used the function we declared in the function declaration section. Here, we solve the Pythagorean Theorem to find our starting X and Y values on the Cartesian plane. In the equation a^2+b^2=c^2, we set the distance the user has chosen equal to c (the hypotenuse), and solve for a & b using a random seed.
+This is where we used the function we declared in the function declaration section. Here, we solve the Pythagorean Theorem to find our starting `X` and `Y` values on the Cartesian plane. In the equation $a^2+b^2=c^2$, we set the distance the user has chosen equal to `c` (the hypotenuse), and solve for `a` and `b` using a random seed.
 
 ```mathematica
 coordsTable = Table[PythagoreanTriple[earthDistance], 3];
@@ -154,7 +155,7 @@ initialX = coordsTable[[All, 1]];
 initialY = coordsTable[[All, 2]];
 ```
 
-Then we do the same thing with velocity vectors, this time using Earth's velocity as c, the hypotenuse, and finding two variables  a and b that work.
+Then we do the same thing with velocity vectors, this time using Earth's velocity as `c`, the hypotenuse, and finding two variables `a` and `b` that work.
 
 `coordsTable = Table[PythagoreanTriple[earthSIVel], 3];`
 
@@ -176,22 +177,21 @@ vyarr = coordsTable[[All, 2]]/3;
 
 ## Calculating Forces Between Bodies
 
-Now for a bit of theory. The gravitational force between n planets is being calculated using Newton's law of universal gravitation.
+Now for a bit of theory. The gravitational force between `n` planets is being calculated using Newton's Law of Gravity.
 
 $$ \vec {F} = G * \frac {m_ {1} * m_ {2}} {r^{2}} * \hat {r} $$
 
- We can project this vector into its two one-dimensional components\[LongDash]one for the x-dimension and one for the y-dimension, in order to calculate the force in each direction independently. We get....
+ We can project this vector into its two one-dimensional components—one for the `x`-dimension and one for the `y`-dimension in order to calculate the force in each direction independently.
 
 $$ x_{j}''(t) = \sum_{i=1}^{\text{planetNumber}} (1-\delta_{ij}) \frac{G * m_{j} * (x_{i}(t) - x_{j}(t))}{\sqrt{(x_{i}(t) - x_{j}(t))^2 + (y_{i}(t) - y_{j}(t))^2}} $$
 
-
 and
 
-$$ (y_ {j}'')(t) = \sum_{i=1}^{\text{planetNumber}} (1-\delta_{ij}) \frac{G * m_{j} * (y_{i}(t) - y_{j}(t))}{\sqrt{(x_{i}(t) - x_{j}(t))^2 + (y_{i}(t) - y_{j}(t))^2}} $$
+$$ y_ {j}''(t) = \sum_{i=1}^{\text{planetNumber}} (1-\delta_{ij}) \frac{G * m_{j} * (y_{i}(t) - y_{j}(t))}{\sqrt{(x_{i}(t) - x_{j}(t))^2 + (y_{i}(t) - y_{j}(t))^2}} $$
 
-If i and j are the same, the force is set to 0 (since a planet doesn't exert a gravitational force on itself). If i and j are different, the force is calculated using the equation for gravitational force. We use the Kronecker Delta to represent this above.
+If `i` and `j` are the same, the force is set to 0 (since a planet doesn't exert a gravitational force on itself). If `i` and `j` are different, the force is calculated using the equation for gravitational force. We use the Kronecker Delta to represent this above.
 
-Here's the above equations converted into a form that Mathematica can read. Here is the equation of motion for the `x` dimension:
+Let's convert the above equations into a form that *Mathematica* can read. Here is the equation of motion for the `x` dimension:
 
 ```mathematica
 equationsOfMotionX = 
@@ -235,12 +235,12 @@ equationsOfMotionY =
     ];
 ```
 
-This code defines two sets of equations: one for the x-coordinates of the planets (equationsOfMotionX) and one for the y-coordinates (equationsOfMotionY).
+This code defines two sets of equations: one for the `x`-coordinates of the planets (`equationsOfMotionX`) and one for the `y`-coordinates (`equationsOfMotionY`).
 
-- `x[j][t]` and `y[j][t]` are the variables that representing the `x` & `y` coordinates of the `j`th planet at time `t`
+- `x[j][t]` and `y[j][t]` are the variables that representing the `x` & `y` coordinates of the `j`th planet at time `t`.
 - `x[i][t]` and `y[i][t]` are variables representing the `x` and `y` coordinates, respectively, of the `i`th planet at time `t`.
-- `G` is the gravitational constant
-- `m[j]` is the mass of the `j`th planet
+- `G` is the gravitational constant.
+- `m[j]` is the mass of the `j`th planet.
 
 In place of the Kronecker Delta, we use Mathematica's `If` function to check whether the planet being considered (`i`) is the same as the planet whose equation of motion is being defined (`j`). If it is, we don't include that force since planets don't exert forces on themselves.
 
@@ -277,7 +277,7 @@ allVars = Flatten[{xarr, yarr}];
 
 ## Numerically Solving The Equation of Motion
 
-The code then uses Mathematica's `NDSolve` function to numerically solve the system of differential equations defined by `equationsOfMotion` and the initial conditions, over a time interval from `t = 0` to `t = 25 * T`, where `T` is the period of the outermost planet. The solution is stored in the `allOrbits` variable.
+The code then uses Mathematica's `NDSolve` function to numerically solve the system of differential equations defined by `equationsOfMotion` and the initial conditions, over a time interval from `t = 0` to `t = 25 * T`, where `T` is the period of the outermost planet.
 
 
 ```mathematica
@@ -297,9 +297,7 @@ For[i = 1, i <= planetNumber, i++,
   ];
 ```
 
-Then we the paths of the planets parametrically from 0 to `T` (whatever we set `T` to be). 
-
-This line of code separates the plotting (`ParametricPlot`) from the plot image-rasterization (`Rasterize`) step. In other words, for each frame of the orbit calculation, we plot the path parametrically, then rasterize it. Then we use `ListAnimate` to step through the rasterize images. This is a common technique to increase the performance of animations.
+Then we the paths of the planets parametrically. This long line of code separates the plotting (`ParametricPlot`) from the plot image-rasterization (`Rasterize`) step. In other words, for each frame of the orbit calculation, we plot the path parametrically, then rasterize it. Then we use `ListAnimate` to step through the rasterize images. This is a common technique to increase the performance of animations.
 
 ```mathematica
 images = Table[
@@ -313,14 +311,14 @@ ListAnimate[images, AnimationRunning -> True, AnimationRate -> 24,
  ImageSize -> 450]
 ```
 
-We then export the code animation.
+We then export the animation of the orbiting bodies...
 
 `Export["/Users/jackzellweger/Desktop/animate.mov", images]`
 
 
 ## Results
 
-<img src="/assets/orbits-1.mov" width="400">
+
 
 
 
