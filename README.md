@@ -248,7 +248,9 @@ In place of the Kronecker Delta, we use Mathematica's `If` function to check whe
 
 We combine the equations of motion into a big list:
 
-`equationsOfMotion = Join[equationsOfMotionX, equationsOfMotionY]`
+```mathematica
+equationsOfMotion = Join[equationsOfMotionX, equationsOfMotionY]
+```
 
 We then use the `Table` function to define a list of initial conditions for the positions and velocities of the planets at time `t = 0`. Notice the 0s plugged into the functions. The initial positions are in `initialXArr` and `initialYArr`, while the initial velocities are in `initialXDerivArr` and `initialYDerivArr`.
 
