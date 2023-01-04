@@ -12,7 +12,7 @@ PythagoreanTriple[distance_] := Module[{x, y, a, q, r},
 
 # The N-Body Solver
 
-### Introduction
+## Introduction
 
 I've always been fascinated by the n-body problem. The way that objects dance around one-another is beautiful. Their chaos, and the way their movements hang in such delicate balance is fascinating.
 
@@ -28,7 +28,7 @@ There are a few constants, then, that we need to have handy for our program to a
 
 **Note: All units are given in SI units.**
 
-### Declaring Celestial Variables & Constants
+## Declaring Celestial Variables & Constants
 
 The Universal Gravitational Constant (UGC). This constant defines the strength of gravity per unit mass, relating kilograms and newtons:
 
@@ -109,7 +109,7 @@ ms = QuantityMagnitude[
    UnitConvert[Entity["Star", "Sun"][EntityProperty["Star", "Mass"]]]];
 ```
 
-### User Input
+## Getting User Input
 
 Change this number to the number of planets we'd like to simulate in the system:
 
@@ -123,6 +123,8 @@ The distances of the bodies from the Sun in astronomical units (AU).
 planetDistances = {5, 5, 5, 5, 5};
 If[planetNumber != Length[planetDistances], Abort[]];
 ```
+
+## The Data Structures
 
 Here, we create an array to hold each planet's distance in meters:
 
@@ -172,6 +174,8 @@ vxarr = coordsTable[[All, 1]]/3;
 vyarr = coordsTable[[All, 2]]/3;
 ```
 
+## Calculating Forces Between Bodies
+
 Now for a bit of theory. The gravitational force between n planets is being calculated using Newton's law of universal gravitation.
 
 $$ \vec {F} = G * \frac {m_ {1} * m_ {2}} {r^{2}} * \hat {r} $$
@@ -207,7 +211,6 @@ equationsOfMotionX =
       ], 
       {j, 1, planetNumber}
     ];
-
 ```
 
 Here is the equation of motion for the `y` dimension:
@@ -241,6 +244,8 @@ This code defines two sets of equations: one for the x-coordinates of the planet
 
 In place of the Kronecker Delta, we use Mathematica's `If` function to check whether the planet being considered (`i`) is the same as the planet whose equation of motion is being defined (`j`). If it is, we don't include that force since planets don't exert forces on themselves.
 
+## Initial Conditions
+
 We combine the equations of motion into a big list:
 
 `equationsOfMotion = Join[equationsOfMotionX, equationsOfMotionY]`
@@ -270,6 +275,8 @@ equationsForNDSolve =
 allVars = Flatten[{xarr, yarr}];
 ```
 
+## Numerically Solving The Equation of Motion
+
 The code then uses Mathematica's `NDSolve` function to numerically solve the system of differential equations defined by `equationsOfMotion` and the initial conditions, over a time interval from `t = 0` to `t = 25 * T`, where `T` is the period of the outermost planet. The solution is stored in the `allOrbits` variable.
 
 
@@ -280,7 +287,7 @@ allOrbits =
     Method\[Rule]"ExplicitRungeKutta"*)]; // Quiet
 ```
 
-This generates the list of equations in the right order to plug in to our ParametricPlot function.
+This generates the list of equations in the right order to plug in to our `ParametricPlot` function.
 
 ```
 drawList = {Nothing};
@@ -290,7 +297,7 @@ For[i = 1, i <= planetNumber, i++,
   ];
 ```
 
-Then we the paths of the planets parametrically from 0 to T (whatever we set T to be). 
+Then we the paths of the planets parametrically from 0 to `T` (whatever we set `T` to be). 
 
 This line of code separates the plotting (`ParametricPlot`) from the plot image-rasterization (`Rasterize`) step. In other words, for each frame of the orbit calculation, we plot the path parametrically, then rasterize it. Then we use `ListAnimate` to step through the rasterize images. This is a common technique to increase the performance of animations.
 
@@ -311,7 +318,9 @@ We then export the code animation.
 `Export["/Users/jackzellweger/Desktop/animate.mov", images]`
 
 
+## Results
 
+<img src="/assets/orbits-1.mov" width="400">
 
 
 
