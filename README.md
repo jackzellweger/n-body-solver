@@ -190,14 +190,46 @@ If i and j are the same, the force is set to 0 (since a planet doesn't exert a g
 Here's the above equations converted into a form that Mathematica can read. Here is the equation of motion for the `x` dimension:
 
 ```
-equationsOfMotionX = Table[(x[j]'')[t] == Sum[If[i == j, 0, G*m[[j]]*((x[i])[t] - (x[j])[t])/Sqrt[((x[i])[t] - (x[j])[t])^2 + ((y[i])[t] - (y[j])[t])^2]*(((x[i])[t] - (x[j])[t])^2 + ((y[i])[t] - (y[j])[t])^2)], {i, 1, planetNumber}], {j, 1, planetNumber}];
+equationsOfMotionX = 
+  Table[
+    (x[j]'')[t] == 
+      Sum[
+        If[i == j, 0, 
+          G*m[[j]]*
+          ((x[i])[t] - (x[j])[t])/
+          Sqrt[
+            ((x[i])[t] - (x[j])[t])^2 + 
+            ((y[i])[t] - (y[j])[t])^2]*
+          (((x[i])[t] - (x[j])[t])^2 + 
+           ((y[i])[t] - (y[j])[t])^2)
+        ], 
+        {i, 1, planetNumber}
+      ], 
+      {j, 1, planetNumber}
+    ];
 
 ```
 
 Here is the equation of motion for the `y` dimension:
 
 ```
-equationsOfMotionY = Table[(y[j]'')[t] == Sum[If[i == j, 0, G*m[[j]]*((y[i])[t] - (y[j])[t])/Sqrt[((x[i])[t] - (x[j])[t])^2 + ((y[i])[t] - (y[j])[t])^2]*(((x[i])[t] - (x[j])[t])^2 + ((y[i])[t] - (y[j])[t])^2)], {i, 1, planetNumber}], {j, 1, planetNumber}];
+equationsOfMotionY = 
+  Table[
+    (y[j]'')[t] == 
+      Sum[
+        If[i == j, 0, 
+          G*m[[j]]*
+          ((y[i])[t] - (y[j])[t])/
+          Sqrt[
+            ((x[i])[t] - (x[j])[t])^2 + 
+            ((y[i])[t] - (y[j])[t])^2]*
+          (((x[i])[t] - (x[j])[t])^2 + 
+           ((y[i])[t] - (y[j])[t])^2)
+        ], 
+        {i, 1, planetNumber}
+      ], 
+      {j, 1, planetNumber}
+    ];
 ```
 
 This code defines two sets of equations: one for the x-coordinates of the planets (equationsOfMotionX) and one for the y-coordinates (equationsOfMotionY).
