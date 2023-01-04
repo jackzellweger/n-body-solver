@@ -100,6 +100,8 @@ ms = QuantityMagnitude[
 
 ## Declaring Functions
 
+This is a function I wrote that will prove helpful to set intitial conditions.
+
 ```mathematica
 PythagoreanTriple[distance_] := Module[{x, y, a, q, r},
   x = RandomReal[{0, distance}];
@@ -179,7 +181,7 @@ vyarr = coordsTable[[All, 2]]/3;
 
 Now for a bit of theory. The gravitational force between `n` planets is being calculated using Newton's Law of Gravity.
 
-$$ \vec {F} = G * \frac {m_ {1} * m_ {2}} {r^{2}} * \hat {r} $$
+$$ \vec{F} = G * \frac{m_{1} * m_{2}} {r^{2}} * \hat{r} $$
 
  We can project this vector into its two one-dimensional components—one for the `x`-dimension and one for the `y`-dimension in order to calculate the force in each direction independently.
 
