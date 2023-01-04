@@ -18,7 +18,7 @@ I've always been fascinated by the n-body problem. The way that objects dance ar
 
 But amazingly, all these beautifully complex interactions just follow one simple rule:
 
-$$ F = G\frac {m} {a} $$
+$$ F = m a $$
 
 That's right, like 99% of physics, it all comes from Newton's Second Law. Almost everything in our universe moves—on a macro scale—according to this law. These movements depend on such a simple equation; it should be easy to write a program that calculates them, right?
 
