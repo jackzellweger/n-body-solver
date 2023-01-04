@@ -187,19 +187,102 @@ $$ (y_ {j}'')(t) = \sum_{i=1}^{\text{planetNumber}} (1-\delta_{ij}) \frac{G * m_
 
 If i and j are the same, the force is set to 0 (since a planet doesn't exert a gravitational force on itself). If i and j are different, the force is calculated using the equation for gravitational force. We use the Kronecker Delta to represent this above.
 
-Here's the above equations converted into a form that Mathematica can read.
+Here's the above equations converted into a form that Mathematica can read. Here is the equation of motion for the `x` dimension:
 
 ```
 equationsOfMotionX = Table[(x[j]'')[t] == Sum[If[i == j, 0, G*m[[j]]*((x[i])[t] - (x[j])[t])/Sqrt[((x[i])[t] - (x[j])[t])^2 + ((y[i])[t] - (y[j])[t])^2]*(((x[i])[t] - (x[j])[t])^2 + ((y[i])[t] - (y[j])[t])^2)], {i, 1, planetNumber}], {j, 1, planetNumber}];
 
 ```
-Since this is really dense, this is what they look like in LaTex
 
-$$
-\begin{aligned}
-equationsOfMotionX = \left\{ \left( x_j'' \right)(t) = \sum_{i=1}^{planetNumber} \left[ \begin{aligned} 0 &\quad\text{if }i=j\\ G\ m_j \frac{\left( x_i \right)(t) - \left( x_j \right)(t)}{\sqrt{\left( x_i \right)(t) - \left( x_j \right)(t)^2 + \left( y_i \right)(t) - \left( y_j \right)(t)^2}} \left( \left( x_i \right)(t) - \left( x_j \right)(t)^2 + \left( y_i \right)(t) - \left( y_j \right)(t)^2 \right) \right] \right\} \quad\text{for }j\in\left\{ 1,\dots,planetNumber \right\}
-\end{aligned}
-$$
+Here is the equation of motion for the `y` dimension:
+
+```
+equationsOfMotionY = Table[(y[j]'')[t] == Sum[If[i == j, 0, G*m[[j]]*((y[i])[t] - (y[j])[t])/Sqrt[((x[i])[t] - (x[j])[t])^2 + ((y[i])[t] - (y[j])[t])^2]*(((x[i])[t] - (x[j])[t])^2 + ((y[i])[t] - (y[j])[t])^2)], {i, 1, planetNumber}], {j, 1, planetNumber}];
+```
+
+This code defines two sets of equations: one for the x-coordinates of the planets (equationsOfMotionX) and one for the y-coordinates (equationsOfMotionY).
+
+- `x[j][t]` and `y[j][t]` are the variables that representing the `x` & `y` coordinates of the `j`th planet at time `t`
+- `x[i][t]` and `y[i][t]` are variables representing the `x` and `y` coordinates, respectively, of the `i`th planet at time `t`.
+- `G` is the gravitational constant
+- `m[j]` is the mass of the `j`th planet
+
+In place of the Kronecker Delta, we use Mathematica's `If` function to check whether the planet being considered (`i`) is the same as the planet whose equation of motion is being defined (`j`). If it is, we don't include that force since planets don't exert forces on themselves.
+
+We combine the equations of motion into a big list:
+
+`equationsOfMotion = Join[equationsOfMotionX, equationsOfMotionY]`
+
+We then use the `Table` function to define a list of initial conditions for the positions and velocities of the planets at time `t = 0`. Notice the 0s plugged into the functions. The initial positions are in `initialXArr` and `initialYArr`, while the initial velocities are in `initialXDerivArr` and `initialYDerivArr`.
+
+```
+initialXArr = Table[x[j][0], {j, 1, planetNumber}];
+initialYArr = Table[y[j][0], {j, 1, planetNumber}];
+initialXDerivArr = Table[Derivative[1][x[j]][0], {j, 1, planetNumber}];
+initialYDerivArr = 
+  Table[Derivative[1][y[j]][0], {j, 1, planetNumber}];
+```
+
+We use`Thread` function to create a list of equations for the numerical solver by pairing  of the initial position and velocity lists with the corresponding functions. For example, `Thread[xarr==initialX]` results in `{y[1][t]==6.96*10^10,y[2][t]==-1.5*10^11,y[3][t]==5.6*10^10}`. This equation is now ready for us to substitute 0 for `t` in all cases.
+
+
+So, we substitute `t = 0` into the resulting list of equations. We then store the resulting list of equations, which represents the system of differential equations to be solved. We then do a little list clean-up.
+
+```
+initialConditions = 
+  Flatten[Join[{Thread[xarr == initialX], Thread[yarr == initialY], 
+     Thread[initialXDerivArr == vxarr], 
+     Thread[initialYDerivArr == vxarr]}]];
+equationsForNDSolve = 
+  Join[equationsOfMotion, initialConditions /. {t -> 0}];
+allVars = Flatten[{xarr, yarr}];
+```
+
+The code then uses Mathematica's `NDSolve` function to numerically solve the system of differential equations defined by `equationsOfMotion` and the initial conditions, over a time interval from `t = 0` to `t = 25 * T`, where `T` is the period of the outermost planet. The solution is stored in the `allOrbits` variable.
+
+
+```
+allOrbits = 
+   NDSolve[equationsForNDSolve, allVars, {t, 0, 25*T}(*, 
+    AccuracyGoal \[Rule] 20, 
+    Method\[Rule]"ExplicitRungeKutta"*)]; // Quiet
+```
+
+This generates the list of equations in the right order to plug in to our ParametricPlot function.
+
+```
+drawList = {Nothing};
+For[i = 1, i <= planetNumber, i++,
+  AppendTo[drawList, xarr[[i]]];
+  AppendTo[drawList, yarr[[i]]];
+  ];
+```
+
+Then we the paths of the planets parametrically from 0 to T (whatever we set T to be). 
+
+This line of code separates the plotting (`ParametricPlot`) from the plot image-rasterization (`Rasterize`) step. In other words, for each frame of the orbit calculation, we plot the path parametrically, then rasterize it. Then we use `ListAnimate` to step through the rasterize images. This is a common technique to increase the performance of animations.
+
+```
+images = Table[
+   Rasterize[
+    ParametricPlot[drawList /. allOrbits, {t, 0, n*T}, 
+     AspectRatio -> 1., ImageSize -> Large, 
+     PlotRange -> {{-5*10^11, 5*10^11}, {-5*10^11, 5*10^11}}, 
+     ColorFunction -> (ColorData["Rainbow"][#3] &), Axes -> False], 
+    ImageResolution -> 150], {n, 0.01, 5, 0.03}];
+ListAnimate[images, AnimationRunning -> True, AnimationRate -> 24, 
+ ImageSize -> 450]
+```
+
+We then export the code animation.
+
+`Export["/Users/jackzellweger/Desktop/animate.mov", images]`
+
+
+
+
+
+
 
 
 
