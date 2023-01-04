@@ -72,7 +72,7 @@ Here, we use Kepler's third law, and some of the constants we've already defined
 
 This is the approximate distance from Earth to the Sun at the time the program is run:
 
-```
+```mathematica
 earthDistance = 
   QuantityMagnitude[
    UnitConvert[
