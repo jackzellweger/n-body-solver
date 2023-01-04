@@ -183,7 +183,7 @@ Now for a bit of theory. The gravitational force between `n` planets is being ca
 
 $$ \vec{F} = G * \frac{m_{1} * m_{2}} {r^{2}} * \hat{r} $$
 
- We can project this vector into its two one-dimensional components—one for the `x`-dimension and one for the `y`-dimension in order to calculate the force in each direction independently.
+ We can generalize this vector equation for `n` bodies, and project it its two one-dimensional components—one for the `x`-dimension and one for the `y`-dimension in order to calculate the force in each direction independently.
 
 $$ x_{j}''(t) = \sum_{i=1}^{\text{planetNumber}} (1-\delta_{ij}) \frac{G * m_{j} * (x_{i}(t) - x_{j}(t))}{\sqrt{(x_{i}(t) - x_{j}(t))^2 + (y_{i}(t) - y_{j}(t))^2}} $$
 
