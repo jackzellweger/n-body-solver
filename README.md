@@ -100,7 +100,7 @@ ms = QuantityMagnitude[
 
 ## Declaring Functions
 
-```
+```mathematica
 PythagoreanTriple[distance_] := Module[{x, y, a, q, r},
   x = RandomReal[{0, distance}];
   a = Quiet[Solve[distance == Sqrt[x^2 + y^2], y, Reals]];
@@ -318,23 +318,6 @@ We then export the animation of the orbiting bodies...
 `Export["/Users/jackzellweger/Desktop/animate.mov", images]`
 
 
-## Results
+## Result
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+https://user-images.githubusercontent.com/20098240/210496445-fa02860f-a783-4984-8f88-cf02956dd801.mov
