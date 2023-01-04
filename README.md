@@ -83,7 +83,7 @@ earthDistance =
 
 The Earth's Angular Velocity in radians per second:
 
-```
+```mathematica
 earthAngularVel = 
   QuantityMagnitude[
    UnitConvert[
@@ -97,14 +97,14 @@ We can calculate the Earth's speed around the Sun from its orbital distance and 
 
 The Earth's mass in kilograms:
 
-```
+```mathematica
 me = QuantityMagnitude[
    UnitConvert[Entity["Planet", "Earth"][EntityProperty["Planet", "Mass"]]]];
 ```
 
 The Sun's mass in kilograms:
 
-```
+```mathematica
 ms = QuantityMagnitude[
    UnitConvert[Entity["Star", "Sun"][EntityProperty["Star", "Mass"]]]];
 ```
@@ -119,7 +119,7 @@ The distances of the bodies from the Sun in astronomical units (AU).
 - Change these values to whatever you want.
 - The number of entries here has to be equal to `planetNumber`.
 
-```
+```mathematica
 planetDistances = {5, 5, 5, 5, 5};
 If[planetNumber != Length[planetDistances], Abort[]];
 ```
@@ -128,14 +128,14 @@ If[planetNumber != Length[planetDistances], Abort[]];
 
 Here, we create an array to hold each planet's distance in meters:
 
-```
+```mathematica
 distanceArrayAU = planetDistances*earthDistance;
 If[planetNumber != Length[distanceArrayAU], Abort[]];
 ```
 
 We set the mass of each of the planets to a random value between 100,000x and 111,000x the Earth's mass; we then put them in an array:
 
-```
+```mathematica
 massArray1 = RandomReal[{100000, 110000}, planetNumber];
 Assert[Length[massArray1] == Length[planetNumber]];
 If[Length[massArray1] != planetNumber, Abort[]]
@@ -148,7 +148,7 @@ A more descriptive variable name would be nice, but I chose `m` as the name here
 
 This is where we used the function we declared in the function declaration section. Here, we solve the Pythagorean Theorem to find our starting X and Y values on the Cartesian plane. In the equation a^2+b^2=c^2, we set the distance the user has chosen equal to c (the hypotenuse), and solve for a & b using a random seed.
 
-```
+```mathematica
 coordsTable = Table[PythagoreanTriple[earthDistance], 3];
 initialX = coordsTable[[All, 1]];
 initialY = coordsTable[[All, 2]];
@@ -160,7 +160,7 @@ Then we do the same thing with velocity vectors, this time using Earth's velocit
 
 Here, we prime our position and velocity variables for use in the equations of motion.
 
-```
+```mathematica
 xarr = Table[x[n][t], {n, 1, planetNumber}];
 yarr = Table[y[n][t], {n, 1, planetNumber}];
 vxarr = Table[vx[n][t], {n, 1, planetNumber}];
@@ -169,7 +169,7 @@ vyarr = Table[vy[n][t], {n, 1, planetNumber}];
 
 And here we calculate velocities:
 
-```
+```mathematica
 vxarr = coordsTable[[All, 1]]/3;
 vyarr = coordsTable[[All, 2]]/3;
 ```
@@ -193,7 +193,7 @@ If i and j are the same, the force is set to 0 (since a planet doesn't exert a g
 
 Here's the above equations converted into a form that Mathematica can read. Here is the equation of motion for the `x` dimension:
 
-```
+```mathematica
 equationsOfMotionX = 
   Table[
     (x[j]'')[t] == 
@@ -215,7 +215,7 @@ equationsOfMotionX =
 
 Here is the equation of motion for the `y` dimension:
 
-```
+```mathematica
 equationsOfMotionY = 
   Table[
     (y[j]'')[t] == 
@@ -252,7 +252,7 @@ We combine the equations of motion into a big list:
 
 We then use the `Table` function to define a list of initial conditions for the positions and velocities of the planets at time `t = 0`. Notice the 0s plugged into the functions. The initial positions are in `initialXArr` and `initialYArr`, while the initial velocities are in `initialXDerivArr` and `initialYDerivArr`.
 
-```
+```mathematica
 initialXArr = Table[x[j][0], {j, 1, planetNumber}];
 initialYArr = Table[y[j][0], {j, 1, planetNumber}];
 initialXDerivArr = Table[Derivative[1][x[j]][0], {j, 1, planetNumber}];
@@ -265,7 +265,7 @@ We use`Thread` function to create a list of equations for the numerical solver b
 
 So, we substitute `t = 0` into the resulting list of equations. We then store the resulting list of equations, which represents the system of differential equations to be solved. We then do a little list clean-up.
 
-```
+```mathematica
 initialConditions = 
   Flatten[Join[{Thread[xarr == initialX], Thread[yarr == initialY], 
      Thread[initialXDerivArr == vxarr], 
@@ -280,7 +280,7 @@ allVars = Flatten[{xarr, yarr}];
 The code then uses Mathematica's `NDSolve` function to numerically solve the system of differential equations defined by `equationsOfMotion` and the initial conditions, over a time interval from `t = 0` to `t = 25 * T`, where `T` is the period of the outermost planet. The solution is stored in the `allOrbits` variable.
 
 
-```
+```mathematica
 allOrbits = 
    NDSolve[equationsForNDSolve, allVars, {t, 0, 25*T}(*, 
     AccuracyGoal \[Rule] 20, 
@@ -289,7 +289,7 @@ allOrbits =
 
 This generates the list of equations in the right order to plug in to our `ParametricPlot` function.
 
-```
+```mathematica
 drawList = {Nothing};
 For[i = 1, i <= planetNumber, i++,
   AppendTo[drawList, xarr[[i]]];
@@ -301,7 +301,7 @@ Then we the paths of the planets parametrically from 0 to `T` (whatever we set `
 
 This line of code separates the plotting (`ParametricPlot`) from the plot image-rasterization (`Rasterize`) step. In other words, for each frame of the orbit calculation, we plot the path parametrically, then rasterize it. Then we use `ListAnimate` to step through the rasterize images. This is a common technique to increase the performance of animations.
 
-```
+```mathematica
 images = Table[
    Rasterize[
     ParametricPlot[drawList /. allOrbits, {t, 0, n*T}, 
