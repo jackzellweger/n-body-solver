@@ -317,7 +317,7 @@ ListAnimate[images, AnimationRunning -> True, AnimationRate -> 24,
 
 We then export the animation of the orbiting bodies...
 
-`Export["/Users/jackzellweger/Desktop/animate.mov", images]`
+`Export["/path/to/file.mov", images]`
 
 
 ## Result
